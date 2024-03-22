@@ -120,3 +120,193 @@ put을 이용해서 만들어 보았다
 - 등록 성공 : 201
 - 페이지 없음 : 404
 - 서버가 죽었을 때 500
+
+# Day 5
+
+### 핸들러란?
+
+![스크린샷 2024-03-22 오후 1.26.47.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ddb53842-0745-42bf-ae35-2e3d0138312e/055786bb-47a9-4e37-bc24-3da116120316/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-03-22_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_1.26.47.png)
+
+```jsx
+app.get(`/youtubers`, (req, res) => {
+  let youtubers = {};
+  db.forEach((youtuber, key) => (youtubers[key] = youtuber));
+
+  res.json(youtubers);
+});
+```
+
+위 코드에서 핸들러는 (res,res)⇒{} 라고 보면 된다.
+
+남이 봤을 때 좀 더 직관적이고 이해하기 쉽게 보여지는게 좋다
+
+```jsx
+app.delete(`/youtubers/:id`, (req, res) => {
+  let { id } = req.params;
+  id = parseInt(id);
+  // youtuber 변수에 담아 조건문을 실행하는게 명시적으로 보기도 좋다
+  const youtuber = db.has(id);
+
+  if (youtuber) {
+    const channelTitle = db.get(id).channelTitle;
+    db.delete(id);
+    res.json(`${channelTitle}님 바이바이`);
+  }
+  res.json("아이디가 없다");
+});
+```
+
+# **json array, find(), 예외 처리**
+
+```jsx
+const fruits = [
+  { id: 1, name: "apple" },
+  { id: 2, name: "oragne" },
+  { id: 3, name: "strawberry" },
+];
+app.get(`/fruits`, (req, res) => {
+  res.json(fruits);
+});
+
+app.get(`/fruits/:id`, (req, res) => {
+  let { id } = req.params;
+  let findFriut = fruits.find((f) => f.id == id);
+  if (findFriut) {
+    res.json({ findFriut });
+  } else {
+    res.status(404).json({ msessage: "존재하지 않는 아이디" });
+  }
+});
+```
+
+find() 메소드를 이용해서 값을 찾을 수 있다.
+
+# **''== vs ==='**
+
+![스크린샷 2024-03-22 오후 2.47.20.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ddb53842-0745-42bf-ae35-2e3d0138312e/4461b498-9b29-4063-a979-9b32167a0d27/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-03-22_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_2.47.20.png)
+
+https://steemit.com/kr-dev/@cheonmr/js-operator
+
+요약하자면,
+
+=== 은 데이터의 타입까지 비교
+
+== 은 값이 같은지 비교한다.
+
+# **YouTuber demo 예외 고도화 : map은 undefined가 아니에요.**
+
+```jsx
+app.get(`/youtubers`, (req, res) => {
+  let youtubers = {};
+  if (db.size !== 0) {
+    db.forEach((youtuber, key) => (youtubers[key] = youtuber));
+  } else {
+    res.status(404).json({ message: "조회할 유튜버가 없습니다." });
+  }
+});
+```
+
+Map 객체는 안에 아무것도 없으면 undefined or null 처럼 false를 반환하지 않는다
+
+Map안에 요소가 0개 일 뿐이다
+
+# **YouTuber demo 예외 고도화 : post**
+
+```jsx
+app.post(`/youtubers`, (req, res) => {
+  const channelTitle = req.body.channelTitle;
+  if (channelTitle) {
+    db.set(id++, req.body);
+
+    res.status(201).json({
+      message: db.get(id - 1).channelTitle + "님 유튜버 생활을 응원합니다.",
+    });
+  } else {
+    res.status(400).json({
+      message: "요청값 제대로 보내라",
+    });
+  }
+});
+```
+
+body 가 비어있을 수도 있으니 예외처리를 잘 해야한다.
+
+# **회원가입 구현**
+
+```jsx
+// 회원가입
+app.post(`/join`, (req, res) => {
+  const { userId, password, name } = req.body;
+  if (userId && password && name) {
+    db.set(id++, req.body);
+    res.status(201).json(`${name}` + "님 가입을 축하합니다");
+  } else {
+    res.status(400).json({ message: "입력 똑바로하세요" });
+  }
+});
+```
+
+body값에서 하나라도 입력을 하지 않았다면 예외처리를 하게 했다.
+
+# **회원 개별 조회, 회원 개별 삭제**
+
+```jsx
+app.get(`/users/:id`, (req, res) => {
+  let { id } = req.params;
+  id = parseInt(id);
+  const findUser = db.get(id);
+  if (findUser) {
+    res.status(200).json(findUser);
+  } else {
+    res.status(404).json({ message: "그런사람없다" });
+  }
+});
+
+app.delete(`/users/:id`, (req, res) => {
+  let { id } = req.params;
+  id = parseInt(id);
+  const deleteUser = db.get(id);
+  if (deleteUser) {
+    db.delete(id);
+    res.status(200).json(`${deleteUser.name}  님 잘가요`);
+  } else {
+    res.status(404).json({ message: "그런사람없다" });
+  }
+});
+```
+
+근데 여기서 route 겹친다 그래서
+
+```jsx
+app
+  .route(`/users/:id`)
+  .get((req, res) => {
+    let { id } = req.params;
+    id = parseInt(id);
+    const findUser = db.get(id);
+    if (findUser) {
+      res.status(200).json(findUser);
+    } else {
+      res.status(404).json({ message: "그런사람없다" });
+    }
+  })
+  .delete((req, res) => {
+    let { id } = req.params;
+    id = parseInt(id);
+    const deleteUser = db.get(id);
+    if (deleteUser) {
+      db.delete(id);
+      res.status(200).json(`${deleteUser.name}  님 잘가요`);
+    } else {
+      res.status(404).json({ message: "그런사람없다" });
+    }
+  });
+```
+
+route메소드로 공통된 url에서 http 메소드에 따라 핸들러를 설정 할 수 있다.
+
+지저분 하지만 각 핸들러를 함수로 만들어서 호출 하면 깔끔해진다
+
+```jsx
+app.route(`/users/:id`).get(getHandler).delete(deleteHandler);
+```
