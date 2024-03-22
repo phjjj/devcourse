@@ -27,9 +27,11 @@ db.set(id++, youtuber3);
 
 app.get(`/youtubers`, (req, res) => {
   let youtubers = {};
-  db.forEach((youtuber, key) => (youtubers[key] = youtuber));
-
-  res.json(youtubers);
+  if (db.size !== 0) {
+    db.forEach((youtuber, key) => (youtubers[key] = youtuber));
+  } else {
+    res.status(404).json({ message: "조회할 유튜버가 없습니다." });
+  }
 });
 app.get(`/youtubers/:id`, function (req, res) {
   let { id } = req.params;
@@ -46,32 +48,39 @@ app.get(`/youtubers/:id`, function (req, res) {
 });
 
 app.post(`/youtubers`, (req, res) => {
-  db.set(id++, req.body);
+  const channelTitle = req.body.channelTitle;
+  if (channelTitle) {
+    db.set(id++, req.body);
 
-  res.json({
-    message: db.get(id - 1).channelTitle + "님 유튜버 생활을 응원합니다.",
-  });
+    res.status(201).json({
+      message: db.get(id - 1).channelTitle + "님 유튜버 생활을 응원합니다.",
+    });
+  } else {
+    res.status(400).json({
+      message: "요청값 제대로 보내라",
+    });
+  }
 });
 
 app.delete(`/youtubers/:id`, (req, res) => {
   let { id } = req.params;
   id = parseInt(id);
-  if (!db.has(id)) {
-    res.json("아이디가 없다");
+  const youtuber = db.has(id);
+
+  if (youtuber) {
+    const channelTitle = db.get(id).channelTitle;
+    db.delete(id);
+    res.json(`${channelTitle}님 바이바이`);
   }
-
-  const channelTitle = db.get(id).channelTitle;
-  db.delete(id);
-
-  res.json(`${channelTitle}님 바이바이`);
+  res.json("아이디가 없다");
 });
 
 app.delete(`/youtubers`, (req, res) => {
-  if (db.size == 0) {
-    res.json("삭제할 유튜버가 없노");
+  if (db.size > 0) {
+    db.clear();
+    res.json("전체 유튜버 삭제");
   }
-  db.clear();
-  res.json("전체 유튜버 삭제");
+  res.json("삭제할 유튜버가 없노");
 });
 
 app.put(`/youtubers/:id`, (req, res) => {
