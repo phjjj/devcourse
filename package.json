@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "nodemon ./express-demo.js"
+    "dev": "nodemon ./channel-demo.js"
   },
   "dependencies": {
     "express": "^4.18.3",

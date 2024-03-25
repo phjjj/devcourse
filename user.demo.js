@@ -5,7 +5,35 @@ let db = new Map();
 var id = 1;
 // 로그인
 app.use(express.json());
-app.post(`/login`, (req, res) => {});
+
+app.post(`/login`, (req, res) => {
+  const { userId, password } = req.body;
+
+  let loginUser = {};
+
+  db.forEach((user, id) => {
+    if (user.userId === userId) {
+      loginUser = user;
+    }
+  });
+
+  if (isExist(loginUser)) {
+    console.log("아이디를 찾았다");
+  } else {
+    if (loginUser.password === password) {
+      console.log("패스워드도 같다");
+    } else {
+      console.log("패스워드는 틀렸다.");
+    }
+  }
+});
+function isExist(obj) {
+  if (Object.keys(obj).length) {
+    return true;
+  } else {
+    return fa;
+  }
+}
 // 회원가입
 app.post(`/join`, (req, res) => {
   const { userId, password, name } = req.body;
