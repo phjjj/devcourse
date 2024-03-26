@@ -1,12 +1,13 @@
 const express = require("express");
-const app = express();
-app.listen(1234);
+const router = express.Router();
+
+// 로그인
+router.use(express.json());
+
 let db = new Map();
 var id = 1;
-// 로그인
-app.use(express.json());
 
-app.post(`/login`, (req, res) => {
+router.post(`/login`, (req, res) => {
   const { userId, password } = req.body;
 
   let loginUser = {};
@@ -18,27 +19,31 @@ app.post(`/login`, (req, res) => {
   });
 
   if (isExist(loginUser)) {
-    console.log("아이디를 찾았다");
-  } else {
     if (loginUser.password === password) {
-      console.log("패스워드도 같다");
+      res.status(200).json({
+        message: `${loginUser.name} 님 로그인 되었습니다.`,
+      });
     } else {
-      console.log("패스워드는 틀렸다.");
+      res.status(400).json({
+        message: "비밀번호가 틀렸습니다.",
+      });
     }
+  } else {
+    console.log("없는 아이디입니다.");
   }
 });
 function isExist(obj) {
   if (Object.keys(obj).length) {
     return true;
   } else {
-    return fa;
+    return false;
   }
 }
 // 회원가입
-app.post(`/join`, (req, res) => {
+router.post(`/join`, (req, res) => {
   const { userId, password, name } = req.body;
   if (userId && password && name) {
-    db.set(id++, req.body);
+    db.set(userId, req.body);
     res.status(201).json(`${name}` + "님 가입을 축하합니다");
   } else {
     res.status(400).json({ message: "입력 똑바로하세요" });
@@ -46,20 +51,22 @@ app.post(`/join`, (req, res) => {
 });
 
 // 회원 개별 조회
-app
-  .route(`/users/:id`)
+router
+  .route(`/users`)
   .get((req, res) => {
-    let { id } = req.params;
-    id = parseInt(id);
-    const findUser = db.get(id);
+    let { userId } = req.body;
+    const findUser = db.get(userId);
     if (findUser) {
-      res.status(200).json(findUser);
+      res.status(200).json({
+        userId: findUser.userId,
+        name: findUser.userId,
+      });
     } else {
       res.status(404).json({ message: "그런사람없다" });
     }
   })
   .delete((req, res) => {
-    let { id } = req.params;
+    let { id } = req.body;
     id = parseInt(id);
     const deleteUser = db.get(id);
     if (deleteUser) {
@@ -71,4 +78,6 @@ app
   });
 
 // 회원 전체 조회
-app.get(`/users`, (req, res) => {});
+router.get(`/users`, (req, res) => {});
+
+module.exports = router;
