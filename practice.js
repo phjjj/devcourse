@@ -1,7 +1,4 @@
-const obj = {}
+function test(){}
 
-console.log(obj=={});
-console.log(Number({}));
-console.log(Number(obj));
-console.log(NaN == NaN);
-
+const test2 = () =>{}
+console.log(test2()===undefined);
