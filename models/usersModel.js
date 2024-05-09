@@ -21,8 +21,9 @@ const findUserByEmail = async (email) => {
   const findByUserQuery = "SELECT * FROM users WHERE email = ?";
   const value = [email];
   const result = await pool.query(findByUserQuery, value);
-  const user = result[0];
-  if (user.length) {
+  const [user] = result[0];
+
+  if (user) {
     return user;
   } else {
     throw new Error("사용자를 찾을 수 없습니다.");

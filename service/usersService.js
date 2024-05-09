@@ -19,7 +19,7 @@ const loginUser = async (email, password) => {
     const user = await UserModel.findUserByEmail(email);
     const hashPassword = crypto.pbkdf2Sync(password, user.salt, 10000, 10, "sha512").toString("base64");
     if (user.password === hashPassword && user) {
-      return true;
+      return user;
     } else {
       return false;
     }

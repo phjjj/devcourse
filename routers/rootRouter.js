@@ -1,8 +1,8 @@
 const express = require("express");
 const { getLogin, postJoin, putPasswordReset, postPasswordReset, putLikes } = require("../controllers/userController");
 const { body } = require("express-validator");
-const validationMiddleware = require("../middleware/validation");
-const { emailValidator, passwordValidator } = require("../middleware/validationRules");
+const validationMiddleware = require("../middleware/validationMiddleware");
+const { emailValidator, passwordValidator } = require("../middleware/validationRulesMiddleware");
 const rootRouter = express.Router();
 
 rootRouter.post("/join", [emailValidator, passwordValidator], validationMiddleware, postJoin);
