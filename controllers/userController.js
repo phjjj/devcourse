@@ -19,51 +19,25 @@ const postJoin = async (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).end("잘못된 요청");
     }
   } catch (error) {
-    console.log(error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "회원가입 실패" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
 };
 
 // 로그인
-const getLogin = (req, res) => {
+const getLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const success = await UserService.loginUser(email, password);
 
-    const sql = "SELECT * FROM users WHERE email = ?";
-    const values = [email];
-
-    pool.query(sql, values, (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.status(StatusCodes.BAD_REQUEST).end();
-      }
-      const loginUser = results[0];
-      const hashPassword = crypto.pbkdf2Sync(password, loginUser.salt, 10000, 10, "sha512").toString("base64");
-
-      if (loginUser && loginUser.password == hashPassword) {
-        const token = jwt.sign(
-          {
-            id: loginUser.id,
-            email: loginUser.email,
-          },
-          process.env.PRIVATE_KEY,
-          {
-            expiresIn: "100m",
-            issuer: "phj",
-          }
-        );
-        res.cookie("token", token, {
-          httpOnly: true,
-        });
-
-        return res.status(StatusCodes.OK).json(results);
-      } else {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ message: "올바르지 않은 사용자 정보" });
-      }
-    });
+    if (success) {
+      // jwt 넘기기
+      return res.status(StatusCodes.CREATED).json({ message: "로그인 성공" });
+    } else {
+      return res.status(StatusCodes.BAD_REQUEST).end("잘못된 요청");
+    }
   } catch (error) {
     console.error(error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "서버 오류" });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
 };
 

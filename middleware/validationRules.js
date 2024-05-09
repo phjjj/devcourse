@@ -4,7 +4,7 @@ const emailValidator = body("email").normalizeEmail().toLowerCase().isEmail().wi
 
 const passwordValidator = body("password")
   .trim()
-  .isLength({ min: 5 })
-  .withMessage("비밀번호는 5자리 이상이어야합니다.");
+  .isLength({ min: 4 })
+  .withMessage("비밀번호는 4자리 이상이어야합니다.");
 
 module.exports = { emailValidator, passwordValidator };

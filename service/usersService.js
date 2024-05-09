@@ -14,4 +14,18 @@ const createUser = async (email, password) => {
   }
 };
 
-module.exports = { createUser };
+const loginUser = async (email, password) => {
+  try {
+    const user = await UserModel.findUserByEmail(email);
+    const hashPassword = crypto.pbkdf2Sync(password, user.salt, 10000, 10, "sha512").toString("base64");
+    if (user.password === hashPassword && user) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    throw new Error("로그인 실패 : " + error.message);
+  }
+};
+
+module.exports = { createUser, loginUser };
