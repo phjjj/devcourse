@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const dotenv = require("dotenv").config();
 const UserService = require("../service/usersService");
+const { generateAccessToken, generateRefreshToken } = require("../utils/jwtUtils");
 // 회원가입
 const postJoin = async (req, res) => {
   try {
@@ -27,11 +28,17 @@ const postJoin = async (req, res) => {
 const getLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const success = await UserService.loginUser(email, password);
+    const user = await UserService.loginUser(email, password);
 
-    if (success) {
-      // jwt 넘기기
-      return res.status(StatusCodes.CREATED).json({ message: "로그인 성공" });
+    if (user) {
+      // jwt 생성하기
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      res.setHeader("Authorization", `Bearer ${accessToken}`); // 헤더에 액세스 토큰 저장
+      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" }); // 리프레시 토큰은 쿠키에 저장
+
+      res.status(StatusCodes.CREATED).json({ message: "로그인 성공" });
     } else {
       return res.status(StatusCodes.BAD_REQUEST).end("잘못된 요청");
     }
