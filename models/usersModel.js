@@ -5,12 +5,7 @@ const createUser = async (email, password, salt) => {
     const createUserQuery = "INSERT INTO users (email, password, salt) VALUES (?, ?, ?)";
     const values = [email, password, salt];
     const result = await pool.query(createUserQuery, values);
-
-    if (result[0].affectedRows > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return result;
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
       throw new Error("이미 존재하는 이메일입니다.");
