@@ -1,12 +1,11 @@
 // 박해준
-const { body, validationResult } = require("express-validator");
 const { StatusCodes } = require("http-status-codes");
 const pool = require("../mariadb");
-const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const dotenv = require("dotenv").config();
 const UserService = require("../service/usersService");
+const UserModel = require("../models/usersModel");
 const { generateAccessToken, generateRefreshToken } = require("../utils/jwtUtils");
+
 // 회원가입
 const postJoin = async (req, res) => {
   try {
@@ -53,16 +52,13 @@ const postPasswordReset = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-    console.log(user);
+    const user = await UserModel.findUserByEmail(email);
+
     if (user) {
-      return res.status(StatusCodes.OK).json({ email });
-    } else {
-      return res.status(StatusCodes.UNAUTHORIZED).end();
+      return res.status(StatusCodes.OK).json({ message: "인증성공" });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(StatusCodes.BAD_REQUEST).end();
+    return res.status(StatusCodes.BAD_REQUEST).end(error.message);
   }
 };
 

@@ -1,5 +1,5 @@
 const pool = require("../mariadb");
-// 회원가입
+// 유저 등록
 const createUser = async (email, password, salt) => {
   try {
     const createUserQuery = "INSERT INTO users (email, password, salt) VALUES (?, ?, ?)";
@@ -16,7 +16,7 @@ const createUser = async (email, password, salt) => {
   }
 };
 
-// 로그인
+// 이메일로 유저 찾기
 const findUserByEmail = async (email) => {
   const findByUserQuery = "SELECT * FROM users WHERE email = ?";
   const value = [email];
