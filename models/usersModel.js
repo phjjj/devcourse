@@ -1,19 +1,10 @@
 const pool = require("../mariadb");
 // 유저 등록
 const createUser = async (email, password, salt) => {
-  try {
-    const createUserQuery = "INSERT INTO users (email, password, salt) VALUES (?, ?, ?)";
-    const values = [email, password, salt];
-    const result = await pool.query(createUserQuery, values);
-    return result;
-  } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") {
-      throw new Error("이미 존재하는 이메일입니다.");
-    }
-
-    console.error("회원가입 에러:", error);
-    throw new Error("회원가입 중 에러 발생");
-  }
+  const createUserQuery = "INSERT INTO users (email, password, salt) VALUES (?, ?, ?)";
+  const values = [email, password, salt];
+  const result = await pool.query(createUserQuery, values);
+  return result;
 };
 
 // 이메일로 유저 찾기
@@ -22,7 +13,7 @@ const findUserByEmail = async (email) => {
   const value = [email];
   const result = await pool.query(findByUserQuery, value);
   const [user] = result[0];
-
+  console.log(user);
   if (user) {
     return user;
   } else {
@@ -30,4 +21,15 @@ const findUserByEmail = async (email) => {
   }
 };
 
-module.exports = { createUser, findUserByEmail };
+// 유지 비밀번호 변경
+const updatePassword = async (email, newPassword, salt) => {
+  const updatePasswordQuery = "UPDATE users SET password = ?, salt = ? WHERE email = ?";
+  const value = [newPassword, salt, email];
+  const [result] = await pool.query(updatePasswordQuery, value);
+  if (result.affectedRows === 0) {
+    throw new Error("변경에 실패하였습니다");
+  }
+  return result;
+};
+
+module.exports = { createUser, findUserByEmail, updatePassword };

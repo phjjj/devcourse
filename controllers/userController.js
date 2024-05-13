@@ -47,10 +47,9 @@ const getLogin = async (req, res) => {
   }
 };
 
-// 비밀번호 초기화 요청
+// 비밀번호 수정 요청
 const postPasswordReset = async (req, res) => {
   const { email } = req.body;
-
   try {
     const user = await UserModel.findUserByEmail(email);
 
@@ -63,27 +62,18 @@ const postPasswordReset = async (req, res) => {
 };
 
 // 비밀번호 수정
-const putPasswordReset = (req, res) => {
-  const { email, password } = req.body;
-
-  const salt = crypto.randomBytes(10).toString("base64");
-  const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 10, "sha512").toString("base64");
-
-  const sql = "UPDATE users SET password = ?, salt = ? WHERE email = ?";
-  const values = [hashPassword, salt, email];
-
-  pool.query(sql, values, (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(StatusCodes.BAD_REQUEST).end();
-    }
-
-    if (results.affectedRows === 0) {
-      return res.status(StatusCodes.BAD_REQUEST).end();
+const putPasswordReset = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const success = await UserService.passwordReset(email, password);
+    if (success) {
+      return res.status(StatusCodes.OK).json({ message: "비밀번호 수정 성공" });
     } else {
-      return res.status(StatusCodes.OK).json(results);
+      return res.status(StatusCodes.BAD_REQUEST).end("잘못된 요청");
     }
-  });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+  }
 };
 
 // 좋아요 추가
