@@ -2,9 +2,9 @@
 const { StatusCodes } = require("http-status-codes");
 const pool = require("../mariadb");
 const crypto = require("crypto");
-const UserService = require("../service/usersService");
-const UserModel = require("../models/usersModel");
-const { generateAccessToken, generateRefreshToken } = require("../utils/jwtUtils");
+const UserService = require("../services/userService");
+const UserModel = require("../models/userModel");
+const jwtUtil = require("../utils/jwtUtil");
 
 // 회원가입
 const postJoin = async (req, res) => {
@@ -31,8 +31,8 @@ const getLogin = async (req, res) => {
 
     if (user) {
       // jwt 생성하기
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
+      const accessToken = jwtUtil.generateAccessToken(user);
+      const refreshToken = jwtUtil.generateRefreshToken(user);
 
       res.setHeader("Authorization", `Bearer ${accessToken}`); // 헤더에 액세스 토큰 저장
       res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" }); // 리프레시 토큰은 쿠키에 저장
