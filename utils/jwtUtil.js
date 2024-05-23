@@ -21,7 +21,10 @@ const generateRefreshToken = (user) => {
 const verifyToken = (token) => {};
 
 // jwt디코딩
-const decodeToken = () => {};
+const decodeToken = (token) => {
+  const decoded = jwt.decode(token, process.env.PRIVATE_KEY);
+  return decoded;
+};
 
 module.exports = {
   generateAccessToken,

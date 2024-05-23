@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const booksService = require("../services/bookSerivce");
+const booksService = require("../services/bookService");
 
 // 전체 도서 조회
 const getAllBooks = async (req, res) => {
