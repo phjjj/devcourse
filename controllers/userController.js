@@ -24,7 +24,7 @@ const postJoin = async (req, res) => {
 };
 
 // 로그인
-const getLogin = async (req, res) => {
+const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await UserService.loginUser(email, password);
@@ -36,14 +36,12 @@ const getLogin = async (req, res) => {
 
       res.setHeader("Authorization", `Bearer ${accessToken}`); // 헤더에 액세스 토큰 저장
       res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" }); // 리프레시 토큰은 쿠키에 저장
-
       res.status(StatusCodes.CREATED).json({ message: "로그인 성공" });
     } else {
-      return res.status(StatusCodes.BAD_REQUEST).end("잘못된 요청");
+      return res.status(StatusCodes.UNAUTHORIZED).end("잘못된 요청");
     }
   } catch (error) {
-    console.error(error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: error.message });
   }
 };
 
@@ -82,7 +80,7 @@ const putLikes = (req, res) => {
 };
 
 module.exports = {
-  getLogin,
+  postLogin,
   postJoin,
   postPasswordReset,
   putPasswordReset,

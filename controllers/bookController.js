@@ -4,6 +4,7 @@ const booksService = require("../services/bookService");
 // 전체 도서 조회
 const getAllBooks = async (req, res) => {
   const { category_id, news, limit, currentPage } = req.query;
+  // console.log(category_id, news, limit, currentPage);
   try {
     const { books, totalCount } = await booksService.getAllBooks(category_id, news, limit, currentPage);
 
@@ -15,7 +16,7 @@ const getAllBooks = async (req, res) => {
       currentPage: parseInt(currentPage),
       totalCount,
     };
-
+    // console.log(pagination);
     res.status(StatusCodes.OK).json({ books, pagination });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });

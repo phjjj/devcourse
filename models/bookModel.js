@@ -17,7 +17,7 @@ const findAllBooks = async (category_id, news, limit, offset) => {
 
   if (category_id && news) {
     const categoryAndNewsQuery =
-      " WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(),INTERVAL 1 MONTH) AND NOW()";
+      " WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
     bookQuery += categoryAndNewsQuery;
 
     values.push(category_id);
@@ -27,17 +27,17 @@ const findAllBooks = async (category_id, news, limit, offset) => {
 
     values.push(category_id);
   } else if (news) {
-    const newsQuery = " WHERE pub_date BETWEEN DATE_SUB(NOW(),INTERVAL 1 MONTH) AND NOW()";
+    const newsQuery = " WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
     bookQuery += newsQuery;
   }
 
   const limitQuery = " LIMIT ? OFFSET ?";
   bookQuery += limitQuery;
 
-  values.push(parseInt(limit), offset);
+  values.push(parseInt(limit), parseInt(offset));
 
   const [results] = await pool.query(bookQuery, values);
-
+  // console.log(results);
   return results;
 };
 
@@ -62,25 +62,26 @@ const getTotalBookCount = async (category_id, news) => {
     countQuery += newsQuery;
   }
 
-  const result = await pool.query(countQuery, values);
-
+  const [result] = await pool.query(countQuery, values);
   return result[0].total_count;
 };
 
 // 비로그인 시 도서 정보 조회
 const findBookForGuest = async (book_id) => {
   const bookDetailQuery = `
-    SELECT 
-        books.*,
-        (
-            SELECT COUNT(*)
-            FROM likes
-            WHERE likes.liked_book_id = books.id
-        ) AS likes
-    FROM
-        books
-    WHERE
-        books.id = ?`;
+  SELECT 
+    books.*,
+    (
+      SELECT COUNT(*)
+      FROM likes
+      WHERE likes.liked_book_id = books.id
+    ) AS likes,
+    category.name AS categoryName 
+  FROM
+    books
+  INNER JOIN category ON books.category_id = category.id
+  WHERE
+    books.id = ?`;
 
   const [result] = await pool.query(bookDetailQuery, [book_id]);
 
@@ -101,9 +102,11 @@ const findBookForLoggedInUser = async (book_id, user_id) => {
             SELECT COUNT(*)
             FROM likes
             WHERE likes.liked_book_id = books.id AND likes.user_id = ?
-        ) AS is_liked
+        ) AS is_liked,
+        category.name AS categoryName
     FROM
         books
+    INNER JOIN category ON books.category_id = category.id
     WHERE
         books.id = ?`;
 

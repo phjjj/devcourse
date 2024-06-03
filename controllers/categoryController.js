@@ -9,6 +9,7 @@ const dotenv = require("dotenv").config();
 const allCategory = async (req, res) => {
   const sql = "SELECT * FROM category";
   const [result] = await pool.query(sql);
+  res.status(StatusCodes.OK).json(result);
 };
 
 module.exports = { allCategory };

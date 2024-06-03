@@ -3,11 +3,10 @@ const bookModel = require("../models/bookModel");
 const getAllBooks = async (category_id, news, limit, currentPage) => {
   const offset = limit * (currentPage - 1);
   const books = await bookModel.findAllBooks(category_id, news, limit, offset);
-
   let totalCount = 0;
-  if (currentPage === 1) {
-    totalCount = await bookModel.getTotalBookCount(category_id, news);
-  }
+
+  totalCount = await bookModel.getTotalBookCount(category_id, news);
+
   return { books, totalCount };
 };
 
