@@ -1,12 +1,12 @@
 const { StatusCodes } = require("http-status-codes");
-const booksService = require("../services/bookService");
+const bookService = require("../services/bookService");
 
 // 전체 도서 조회
 const getAllBooks = async (req, res) => {
   const { category_id, news, limit, currentPage } = req.query;
   // console.log(category_id, news, limit, currentPage);
   try {
-    const { books, totalCount } = await booksService.getAllBooks(category_id, news, limit, currentPage);
+    const { books, totalCount } = await bookService.getAllBooks(category_id, news, limit, currentPage);
 
     if (books.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: "비어있음" });
@@ -32,7 +32,7 @@ const getBookDetail = async (req, res) => {
   const { id: book_id } = req.params;
   try {
     const token = req.headers.authorization;
-    const book = await booksService.getBookDetail(book_id, token);
+    const book = await bookService.getBookDetail(book_id, token);
     return res.status(StatusCodes.OK).json(book);
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });

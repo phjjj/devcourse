@@ -102,7 +102,7 @@ const findBookForLoggedInUser = async (book_id, user_id) => {
             SELECT COUNT(*)
             FROM likes
             WHERE likes.liked_book_id = books.id AND likes.user_id = ?
-        ) AS is_liked,
+        ) AS liked,
         category.name AS categoryName
     FROM
         books

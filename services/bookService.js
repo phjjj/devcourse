@@ -1,4 +1,5 @@
 const bookModel = require("../models/bookModel");
+const jwtUtil = require("../utils/jwtUtil");
 
 const getAllBooks = async (category_id, news, limit, currentPage) => {
   const offset = limit * (currentPage - 1);
@@ -13,7 +14,8 @@ const getAllBooks = async (category_id, news, limit, currentPage) => {
 const getBookDetail = async (book_id, token) => {
   let book;
   if (token) {
-    book = await bookModel.findBookForLoggedInUser(book_id, token);
+    const decoded = jwtUtil.decodeToken(token);
+    book = await bookModel.findBookForLoggedInUser(book_id, decoded.id);
   } else {
     book = await bookModel.findBookForGuest(book_id);
   }

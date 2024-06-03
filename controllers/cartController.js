@@ -9,7 +9,7 @@ const jwtUtil = require("../utils/jwtUtil");
 const getCart = async (req, res) => {
   const { selected } = req.body;
 
-  const token = req.headers.authorization.split("Bearer ")[1];
+  const token = req.headers.authorization;
   const user = jwtUtil.decodeToken(token);
 
   try {
@@ -24,12 +24,12 @@ const getCart = async (req, res) => {
 const postAddCart = async (req, res) => {
   const { book_id, quantity } = req.body;
 
-  const token = req.headers.authorization.split("Bearer ")[1];
+  const token = req.headers.authorization;
   const user = jwtUtil.decodeToken(token);
 
   try {
     const results = await cartService.addCart(book_id, quantity, user.id);
-    return res.status(StatusCodes.CREATED).json(results);
+    return res.status(StatusCodes.OK).json(results);
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
   }

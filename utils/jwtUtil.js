@@ -22,6 +22,7 @@ const verifyToken = (token) => {};
 
 // jwt디코딩
 const decodeToken = (token) => {
+  token = token.split("Bearer ")[1];
   const decoded = jwt.decode(token, process.env.PRIVATE_KEY);
   return decoded;
 };
