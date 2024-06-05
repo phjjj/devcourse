@@ -7,7 +7,7 @@ const findCart = async (userId, selected) => {
                 WHERE user_id=?`;
   const values = [userId];
 
-  if (selected.length) {
+  if (selected) {
     // 주문서 작성 시 '선택한 장바구니 목록 조회'
     sql += ` AND cartItems.id IN (?)`;
     values.push(selected);

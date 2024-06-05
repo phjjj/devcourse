@@ -8,7 +8,6 @@ const jwtUtil = require("../utils/jwtUtil");
 // 장바구니 불러오기
 const getCart = async (req, res) => {
   const { selected } = req.body;
-
   const token = req.headers.authorization;
   const user = jwtUtil.decodeToken(token);
 
@@ -23,21 +22,26 @@ const getCart = async (req, res) => {
 // 장바구니 담기
 const postAddCart = async (req, res) => {
   const { book_id, quantity } = req.body;
-
-  const token = req.headers.authorization;
-  const user = jwtUtil.decodeToken(token);
-
   try {
+    const token = req.headers.authorization;
+    const user = jwtUtil.decodeToken(token);
+
     const results = await cartService.addCart(book_id, quantity, user.id);
     return res.status(StatusCodes.OK).json(results);
   } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+    return res.status(StatusCodes.UNAUTHORIZED).json({ error: error.message });
   }
 };
 
 // 장바구니 삭제하기
 const deleteRemovecCart = (req, res) => {
-  const { id: cartItemsId } = req.params;
+  const { id } = req.params;
+  try {
+    const results = cartService.removeCart(id);
+    return res.status(StatusCodes.OK).json(results);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
+  }
 };
 
 module.exports = { postAddCart, getCart, deleteRemovecCart };

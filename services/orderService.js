@@ -1,7 +1,7 @@
 // orderService.js
 const orderModel = require("../models/orderModel");
 // 주문하기
-const order = async ({ items, delivery, firstBookTitle, totalQuantity, totalPrice, userId }) => {
+const order = async (items, delivery, firstBookTitle, totalQuantity, totalPrice, userId) => {
   try {
     let delivery_id;
     let order_id;
